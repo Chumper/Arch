@@ -4,7 +4,7 @@
 drive=/dev/sda
 
 partition () {
-  if  /sbin/sfdisk -d ${drive} 2>&1 -eq 1; then
+  if /sbin/sfdisk -d ${drive} 2>&1 ; then
     printf "Partitioning..."
     
     available_memory=$(free -m | grep Mem | awk '{print $2}')
