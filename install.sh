@@ -5,22 +5,22 @@ drive=/dev/sda
 
 partition () {
   if  [[ $(/sbin/sfdisk -d ${drive}) =~ "does not contain" ]]; then
-    echo "Partitioning..."
+    printf "Partitioning..."
     
     available_memory=$(free -m | grep Mem | awk '{print $2}')
-    available_disk=$(fdisk -l | grep "${drive}" | aws '{print $5}')
+    available_disk=$(fdisk -l | grep "${drive}" | awk '{print $5}')
     
     boot_size=500000000 # 500M
-    swap_size=$(expr $available_memory / 2)
-    home_size=$(expr $available_disk - boot_size - home_size )
+    swap_size=$(expr ${available_memory} / 2)
+    home_size=$(expr ${available_disk} - ${boot_size} - ${home_size} )
 
     # partition the disk
-    echo "Total Memory:\t${$available_memory}"
-    echo "Total Disk Size:\t${$available_disk}"
-    echo "--------"
-    echo "Boot Partition:\t$(numfmt --to=si ${boot_size})"
-    echo "Swap Partition:\t$(numfmt --to=si ${swap_size})"
-    echo "Home Partition:\t$(numfmt --to=si ${home_size})" 
+    printf "Total Memory:\t${available_memory}"
+    printf "Total Disk Size:\t${available_disk}"
+    printf "--------"
+    printf "Boot Partition:\t$(numfmt --to=si ${boot_size})"
+    printf "Swap Partition:\t$(numfmt --to=si ${swap_size})"
+    printf "Home Partition:\t$(numfmt --to=si ${home_size})" 
   fi
 }
 
