@@ -4,7 +4,7 @@
 drive=/dev/sda
 
 partition () {
-  if  [[ $(/sbin/sfdisk -d ${drive}) =~ "does not contain" ]]; then
+  if  [[ $(/sbin/sfdisk -d ${drive} 2>&1) =~ "does not contain" ]]; then
     printf "Partitioning..."
     
     available_memory=$(free -m | grep Mem | awk '{print $2}')
