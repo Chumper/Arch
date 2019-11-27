@@ -2,6 +2,10 @@
 
 ##### CONSTANTS
 drive=/dev/sda
+root_password=<changeme>
+user_name=John
+user_password=doe
+
 
 partition () {
   if ! /sbin/sfdisk -d ${drive} > /dev/null 2>&1 ; then
@@ -26,7 +30,7 @@ partition () {
     echo -e "Swap Partition:\t\t$(numfmt --format=%.1f --to=iec ${swap_size})"
     echo -e "Home Partition:\t\t$(numfmt --format=%.1f --to=iec ${home_size})" 
 
-    parted ${drive} mklabel gpt
+    parted ${drive} mklabel msdos
     parted -a optimal ${drive} mkpart primary ext4 1MiB ${boot_size}
     parted set 1 boot on
     parted -a optimal ${drive} mkpart primary ext4 ${boot_size} $(numfmt --to=iec --format=%.2f $(( $(numfmt --from=iec ${boot_size}) + ${home_size} )) )
@@ -70,9 +74,73 @@ archroot () {
     fi
 }
 
+locale () {
+    if [[ $(arch-chroot /mnt bash -c 'cat /etc/locale.gen | wc -l') -gt 1 ]]; then
+        echo -e "\n######## Generating locale...\n"
+        arch-chroot /mnt bash -c 'echo "en_US UTF-8" > /etc/locale.gen'
+        arch-chroot /mnt bash -c 'locale-gen'
+        arch-chroot /mnt bash -c 'Lang="en_US.UTF-8" > /etc/locale.conf'
+    fi
+}
+
+timezone () {
+    if ! arch-chroot /mnt bash -c 'test -f /etc/localtime'; then
+        echo -e "\n######## Linking timezone...\n"
+        arch-chroot /mnt bash -c 'ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime'
+    fi
+}
+
+hostname () {
+    if ! arch-chroot /mnt bash -c 'test -f /etc/hostname'; then
+        echo -e "\n######## Setting hostname...\n"
+        arch-chroot /mnt bash -c 'echo "arch" > /etc/hostname'
+    fi
+}
+
+hosts () {
+    if [[ $(arch-chroot /mnt bash -c 'cat /etc/hosts | grep arch | wc -l') -lt 1 ]]; then
+        echo -e "\n######## Setting hosts...\n"
+        arch-chroot /mnt bash -c 'echo -e "127.0.0.1\tlocalhost\n::1\t\tlocalhost\n127.0.1.1\tarch.localdomain\tarch" >> /etc/hosts'
+    fi
+}
+
+passwd () {
+    echo -e "\n######## Setting root password...\n"
+    arch-chroot /mnt bash -c "echo 'root:${root_password}' | chpasswd"
+}
+
+adduser () {
+    if ! arch-chroot /mnt bash -c "id ${user_name} > /dev/null 2>&1"; then
+        echo -e "\n######## Adding user '${user_name}'...\n"
+        arch-chroot /mnt bash -c "useradd --home-dir /home/${user_name} --create-home ${user_name}"
+        arch-chroot /mnt bash -c "echo '${user_name}:${user_password}' | chpasswd"
+    fi
+    if [[ $(arch-chroot /mnt bash -c 'cat /etc/hosts | grep arch | wc -l') -lt 1 ]]; then
+        echo -e "\n######## Adding user '${user_name}' to sudoers...\n"
+        arch-chroot /mnt bash -c "pacman -S sudo --noconfirm"
+        arch-chroot /mnt bash -c "sed '/^root ALL=(ALL) ALL$/a ${user_name} ALL=(ALL) ALL' /etc/sudoers"
+    fi
+}
+
+grub () {
+    if ! arch-chroot /mnt bash -c 'test -f /boot/grub/grub.cfg'; then
+        echo -e "\n######## Installing grub...\n"
+        arch-chroot /mnt bash -c 'pacman -S grub --noconfirm'
+        arch-chroot /mnt bash -c "grub-install ${drive}"
+        arch-chroot /mnt bash -c 'grub-mkconfig -o /boot/grub/grub.cfg'
+        arch-chroot /mnt bash -c 'mkinitcpio -P'
+    fi
+}
+
 ### MAIN
 
 partition
 base
 fstab
-archroot
+locale
+timezone
+hostname
+hosts
+passwd
+adduser
+grub
