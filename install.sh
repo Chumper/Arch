@@ -31,26 +31,46 @@ partition () {
             echo -e "Swap Partition:\t\t$(numfmt --format=%.1f --to=iec ${swap_size})"
             echo -e "Home Partition:\t\t$(numfmt --format=%.1f --to=iec ${home_size})" 
 
-            parted ${drive} mklabel msdos
-            parted -a optimal ${drive} mkpart primary ext4 1MiB ${boot_size}
-            parted set 1 boot on
-            parted -a optimal ${drive} mkpart primary ext4 ${boot_size} $(numfmt --to=iec --format=%.2f $(( $(numfmt --from=iec ${boot_size}) + ${home_size} )) )
-            parted -a optimal ${drive} mkpart primary linux-swap $(numfmt --to=iec --format=%.2f $(( $(numfmt --from=iec ${boot_size}) + ${home_size} )) ) 100%
+            parted ${drive} mklabel msdos > /dev/null 2>&1
+            parted -a optimal ${drive} mkpart primary ext4 1MiB ${boot_size} > /dev/null 2>&1
+            parted -a optimal ${drive} mkpart primary ext4 ${boot_size} $(numfmt --to=iec --format=%.2f $(( $(numfmt --from=iec ${boot_size}) + ${home_size} )) ) > /dev/null 2>&1
+            parted -a optimal ${drive} mkpart primary linux-swap $(numfmt --to=iec --format=%.2f $(( $(numfmt --from=iec ${boot_size}) + ${home_size} )) ) 100% > /dev/null 2>&1
+            parted ${drive} set 1 boot on > /dev/null 2>&1
+        fi
+    fi
+}
 
-            echo -e "\n######## Creating file systems...\n"
-
-            #  create fs system
+filesystem () {
+    if command -v arch-chroot > /dev/null 2>&1; then
+        if mount /dev/sda1 /mnt; then
+            umount /dev/sda1
+        else
+            echo -e "\n######## Creating file system on /dev/sda1...\n"
             mkfs.ext4 /dev/sda1
+        fi
+        if mount /dev/sda2 /mnt; then
+            umount /dev/sda2
+        else
+            echo -e "\n######## Creating file system on /dev/sda2...\n"
             mkfs.ext4 /dev/sda2
+        fi
+        if swapon /dev/sda3; then
+            swapoff /dev/sda3
+        else
+            echo -e "\n######## Creating file system on /dev/sda3...\n"
             mkswap /dev/sda3
+        fi
+    fi
+}
 
+domount () {
+    if command -v arch-chroot > /dev/null 2>&1; then
+        if ! mountpoint /mnt > /dev/null 2>&1; then
             echo -e "\n######## Mounting...\n"
-
-            # mount
-            swapon /dev/sda3
-            mount /dev/sda2 /mnt
+            swapon /dev/sda3 || true
+            mount /dev/sda2 /mnt || true
             mkdir -p /mnt/boot
-            mount /dev/sda1 /mnt/boot
+            mount /dev/sda1 /mnt/boot || true
         fi
     fi
 }
@@ -173,12 +193,15 @@ vbox () {
 ### MAIN
 
 partition
-base
-fstab
-locale
-timezone
-hostname
-hosts
-passwd
-adduser
-grub
+filesystem
+domount
+# base
+# fstab
+# locale
+# timezone
+# hostname
+# hosts
+# passwd
+# adduser
+# grub
+# dhcp
