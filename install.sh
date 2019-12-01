@@ -33,31 +33,19 @@ partition () {
 
             parted ${drive} mklabel msdos > /dev/null 2>&1
             parted -a optimal ${drive} mkpart primary ext4 1MiB ${boot_size} > /dev/null 2>&1
-            parted -a optimal ${drive} mkpart primary ext4 ${boot_size} $(numfmt --to=iec --format=%.2f $(( $(numfmt --from=iec ${boot_size}) + ${home_size} )) ) > /dev/null 2>&1
-            parted -a optimal ${drive} mkpart primary linux-swap $(numfmt --to=iec --format=%.2f $(( $(numfmt --from=iec ${boot_size}) + ${home_size} )) ) 100% > /dev/null 2>&1
             parted ${drive} set 1 boot on > /dev/null 2>&1
-        fi
-    fi
-}
 
-filesystem () {
-    if command -v arch-chroot > /dev/null 2>&1; then
-        if mount /dev/sda1 /mnt; then
-            umount /dev/sda1
-        else
-            echo -e "\n######## Creating file system on /dev/sda1...\n"
+            parted -a optimal ${drive} mkpart primary ext4 ${boot_size} $(numfmt --to=iec --format=%.2f $(( $(numfmt --from=iec ${boot_size}) + ${home_size} )) ) > /dev/null 2>&1
+
+            parted -a optimal ${drive} mkpart primary linux-swap $(numfmt --to=iec --format=%.2f $(( $(numfmt --from=iec ${boot_size}) + ${home_size} )) ) 100% > /dev/null 2>&1
+            
+            echo -e "\n######## Creating filesystem on /dev/sda1...\n"
             mkfs.ext4 /dev/sda1
-        fi
-        if mount /dev/sda2 /mnt; then
-            umount /dev/sda2
-        else
-            echo -e "\n######## Creating file system on /dev/sda2...\n"
+            
+            echo -e "\n######## Creating filesystems on /dev/sda2......\n"
             mkfs.ext4 /dev/sda2
-        fi
-        if swapon /dev/sda3; then
-            swapoff /dev/sda3
-        else
-            echo -e "\n######## Creating file system on /dev/sda3...\n"
+            
+            echo -e "\n######## Creating filesystems on /dev/sda3......\n"
             mkswap /dev/sda3
         fi
     fi
@@ -65,12 +53,18 @@ filesystem () {
 
 domount () {
     if command -v arch-chroot > /dev/null 2>&1; then
-        if ! mountpoint /mnt > /dev/null 2>&1; then
-            echo -e "\n######## Mounting...\n"
-            swapon /dev/sda3 || true
+        if ! mount | grep -c /dev/sda2 > /dev/null 2>&1; then
+            echo -e "\n######## Mounting /dev/sda2...\n"
             mount /dev/sda2 /mnt || true
+        fi
+        if ! mount | grep -c /dev/sda1 > /dev/null 2>&1; then
+            echo -e "\n######## Mounting /dev/sda1...\n"
             mkdir -p /mnt/boot
             mount /dev/sda1 /mnt/boot || true
+        fi
+        if ! swapon -s | grep -c /dev/sda3 > /dev/null 2>&1; then
+            echo -e "\n######## Mounting /dev/sda3...\n"
+            swapon /dev/sda3 || true
         fi
     fi
 }
@@ -79,7 +73,7 @@ base () {
     if command -v arch-chroot > /dev/null 2>&1; then
         if [ ! -d "/mnt/etc" ]; then
             echo -e "\n######## Installing base system...\n"
-            pacstrap /mnt base linux linux-firmware
+            pacstrap /mnt base linux linux-firmware base-devel
         fi
     fi
 }
@@ -170,38 +164,121 @@ grub () {
 
 dhcp () {
     if command -v arch-chroot > /dev/null 2>&1; then
-        if ! arch-chroot /mnt bash -c 'pacman -Qi dhcpcd'; then
+        if ! arch-chroot /mnt bash -c 'command -v dhcpcd > /dev/null 2>&1'; then
             echo -e "\n######## Installing dhcpcd...\n"
-            pacman -S dhcpcd --noconfirm
+            arch-chroot /mnt bash -c 'pacman -Sy dhcpcd --noconfirm'
+            echo -e "\n\n\n\nYOU NEED TO REBOOT!\n\nLog in as ${user_name} and start 'dhcpcd'\nThen continue running the script\n\n\n"
         fi
     fi
     if ! command -v arch-chroot > /dev/null 2>&1; then
         iname=$(ip -o link show | sed -rn '/^[0-9]+: en/{s/.: ([^:]*):.*/\1/p}')
-        echo -e "\n######## Starting dhcpcd...\n"
-        dhcpcd
-        systemctl enable dhcpcd@${iname}.service
+        if ! systemctl is-enabled dhcpcd@${iname}.service > /dev/null 2>&1; then
+            echo -e "\n######## Starting dhcpcd...\n"
+            dhcpcd > /dev/null 2>&1
+            systemctl enable dhcpcd@${iname}.service
+        fi
     fi
 }
 
 vbox () {
-    pacman -S virtualbox-guest-modules-arch virtualbox-guest-utils
-    echo -e "vboxguest\nvboxsf\nvboxvideo" > /etc/modules-load.d/virtualbox.conf
-    systemctl enable vboxservice.service
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if [ ! -f "/etc/modules-load.d/virtualbox.conf" ]; then
+            echo -e "\n######## Setting up virtual box...\n"
+            pacman -S virtualbox-guest-modules-arch virtualbox-guest-utils
+            echo -e "vboxguest\nvboxsf\nvboxvideo" > /etc/modules-load.d/virtualbox.conf
+            systemctl enable vboxservice.service
+        fi
+    fi
+}
+
+install_xserver () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if ! command -v startx > /dev/null 2>&1; then
+            echo -e "\n######## Installing xserver...\n"
+            pacman -S xorg-server xorg-xinit xorg-apps --noconfirm
+        fi
+    fi
+}
+
+install_git () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if ! command -v git > /dev/null 2>&1; then
+            echo -e "\n######## Installing git...\n"
+            pacman -S git --noconfirm
+        fi
+    fi
+}
+
+install_go () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if ! command -v go > /dev/null 2>&1; then
+            echo -e "\n######## Installing go...\n"
+            pacman -S go --noconfirm
+        fi
+    fi
+}
+
+install_yay () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if ! command -v yay > /dev/null 2>&1; then
+            echo -e "\n######## Installing yay...\n"
+            cd /home/${user_name}
+            rm -rf yay
+            su ${user_name} -c 'git clone https://aur.archlinux.org/yay.git'
+            cd yay
+            su ${user_name} -c 'makepkg -s'
+            pacman -U yay*xz --noconfirm
+        fi
+    fi
+}
+
+install_ttf () {
+    echo "installing roboto ttf"
+}
+
+install_i3 () {
+    echo "installing i3"
+}
+
+install_feh () {
+    echo "installing feh"
+}
+
+install_zsh () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if ! command -v zsh > /dev/null 2>&1; then
+            yay -S zsh --noconfirm
+            su ${user_name} -c 'chsh -s /bin/zsh'
+        fi
+    fi
+}
+
+install_polybar () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if ! command -v polybar > /dev/null 2>&1; then
+            yay -S polybar --noconfirm
+        fi
+    fi
 }
 
 
 ### MAIN
 
 partition
-filesystem
 domount
-# base
-# fstab
-# locale
-# timezone
-# hostname
-# hosts
-# passwd
-# adduser
-# grub
-# dhcp
+base
+fstab
+locale
+timezone
+hostname
+hosts
+passwd
+adduser
+grub
+dhcp
+vbox
+install_xserver
+install_git
+install_go
+install_yay
+install_zsh
