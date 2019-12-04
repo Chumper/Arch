@@ -195,7 +195,7 @@ install_xserver () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if ! command -v startx > /dev/null 2>&1; then
             echo -e "\n######## Installing xserver...\n"
-            pacman -S xorg-server xorg-xinit xorg-apps --noconfirm
+            pacman -Sy xorg-server xorg-xinit xorg-apps --noconfirm
         fi
     fi
 }
@@ -204,7 +204,7 @@ install_git () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if ! command -v git > /dev/null 2>&1; then
             echo -e "\n######## Installing git...\n"
-            pacman -S git --noconfirm
+            pacman -Sy git --noconfirm
         fi
     fi
 }
@@ -213,7 +213,7 @@ install_go () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if ! command -v go > /dev/null 2>&1; then
             echo -e "\n######## Installing go...\n"
-            pacman -S go --noconfirm
+            pacman -Sy go --noconfirm
         fi
     fi
 }
@@ -224,20 +224,30 @@ install_yay () {
             echo -e "\n######## Installing yay...\n"
             cd /home/${user_name}
             rm -rf yay
-            su ${user_name} -c 'git clone https://aur.archlinux.org/yay.git'
+            git clone https://aur.archlinux.org/yay.git
             cd yay
-            su ${user_name} -c 'makepkg -s'
+            makepkg -s
             pacman -U yay*xz --noconfirm
         fi
     fi
 }
 
 install_ttf () {
-    echo "installing roboto ttf"
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if ! pacman -Q ttf-roboto > /dev/null 2>&1; then
+            echo -e "\n######## Installing ttf font...\n"
+            yay -Sy ttf-roboto --noconfirm
+        fi
+    fi
 }
 
 install_i3 () {
-    echo "installing i3"
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if ! command -v i3 > /dev/null 2>&1; then
+            echo -e "\n######## Installing i3...\n"
+            yay -Sy i3-gaps --noconfirm
+        fi
+    fi
 }
 
 install_feh () {
@@ -247,8 +257,18 @@ install_feh () {
 install_zsh () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if ! command -v zsh > /dev/null 2>&1; then
+            echo -e "\n######## Installing zsh...\n"
             yay -S zsh --noconfirm
-            su ${user_name} -c 'chsh -s /bin/zsh'
+            chsh -s /bin/zsh ${user_name}
+        fi
+    fi
+}
+
+install_oh_my_zsh () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if [ ! -d ~/.oh-my-zsh > /dev/null 2>&1; then
+            echo -e "\n######## Installing oh-my-zsh...\n"
+            sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
         fi
     fi
 }
@@ -256,11 +276,29 @@ install_zsh () {
 install_polybar () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if ! command -v polybar > /dev/null 2>&1; then
+            echo -e "\n######## Installing polybar...\n"
             yay -S polybar --noconfirm
         fi
     fi
 }
 
+add_xinitrc () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if [ ! -f "~/.xinitrc" ]; then
+            echo -e "\n######## Adding i3 to xserver...\n"
+            echo "exec i3" > ~/.xinitrc
+        fi
+    fi
+}
+
+autostart_xserver () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if [ ! -f "~/.zprofile" ]; then
+            echo -e "\n######## Adding xserver to autostart...\n"
+            echo -e 'if systemctl -q is-active graphical.target && [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]]; then\n  exec startx\nfi' > ~/.zprofile
+        fi
+    fi
+}
 
 ### MAIN
 
@@ -281,4 +319,10 @@ install_xserver
 install_git
 install_go
 install_yay
+install_i3
 install_zsh
+install_oh_my_zsh
+install_ttf
+install_polybar
+add_xinitrc
+autostart_xserver
