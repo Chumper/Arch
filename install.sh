@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ##### CONSTANTS
-drive=/dev/sda
+drive=/dev/vda
 root_password=123
 user_name=nils
 user_password=123
@@ -39,32 +39,32 @@ partition () {
 
             parted -a optimal ${drive} mkpart primary linux-swap $(numfmt --to=iec --format=%.2f $(( $(numfmt --from=iec ${boot_size}) + ${home_size} )) ) 100% > /dev/null 2>&1
             
-            echo -e "\n######## Creating filesystem on /dev/sda1...\n"
-            mkfs.ext4 /dev/sda1
+            echo -e "\n######## Creating filesystem on ${drive}1...\n"
+            mkfs.ext4 ${drive}1
             
-            echo -e "\n######## Creating filesystems on /dev/sda2......\n"
-            mkfs.ext4 /dev/sda2
+            echo -e "\n######## Creating filesystems on ${drive}2......\n"
+            mkfs.ext4 ${drive}2
             
-            echo -e "\n######## Creating filesystems on /dev/sda3......\n"
-            mkswap /dev/sda3
+            echo -e "\n######## Creating filesystems on ${drive}3......\n"
+            mkswap ${drive}3
         fi
     fi
 }
 
 domount () {
     if command -v arch-chroot > /dev/null 2>&1; then
-        if ! mount | grep -c /dev/sda2 > /dev/null 2>&1; then
-            echo -e "\n######## Mounting /dev/sda2...\n"
-            mount /dev/sda2 /mnt || true
+        if ! mount | grep -c ${drive}2 > /dev/null 2>&1; then
+            echo -e "\n######## Mounting ${drive}2...\n"
+            mount ${drive}2 /mnt || true
         fi
-        if ! mount | grep -c /dev/sda1 > /dev/null 2>&1; then
-            echo -e "\n######## Mounting /dev/sda1...\n"
+        if ! mount | grep -c ${drive}1 > /dev/null 2>&1; then
+            echo -e "\n######## Mounting ${drive}1...\n"
             mkdir -p /mnt/boot
-            mount /dev/sda1 /mnt/boot || true
+            mount ${drive}1 /mnt/boot || true
         fi
-        if ! swapon -s | grep -c /dev/sda3 > /dev/null 2>&1; then
-            echo -e "\n######## Mounting /dev/sda3...\n"
-            swapon /dev/sda3 || true
+        if ! swapon -s | grep -c ${drive}3 > /dev/null 2>&1; then
+            echo -e "\n######## Mounting ${drive}3...\n"
+            swapon ${drive}3 || true
         fi
     fi
 }
@@ -73,7 +73,7 @@ base () {
     if command -v arch-chroot > /dev/null 2>&1; then
         if [ ! -d "/mnt/etc" ]; then
             echo -e "\n######## Installing base system...\n"
-            pacstrap /mnt base linux linux-firmware base-devel
+            pacstrap /mnt base linux linux-firmware base-devel vim tree
         fi
     fi
 }
@@ -162,6 +162,15 @@ grub () {
     fi
 }
 
+install_ly () {
+    if command -v arch-chroot > /dev/null 2>&1; then
+        if ! arch-chroot /mnt bash -c 'systemctl is-enabled ly.service > /dev/null 2>&1'; then
+            echo -e "\n######## Installing ly...\n"
+            yay -Sy ly-git --noconfirm
+        fi
+    fi
+}
+
 dhcp () {
     if command -v arch-chroot > /dev/null 2>&1; then
         if ! arch-chroot /mnt bash -c 'command -v dhcpcd > /dev/null 2>&1'; then
@@ -175,27 +184,16 @@ dhcp () {
         if ! systemctl is-enabled dhcpcd@${iname}.service > /dev/null 2>&1; then
             echo -e "\n######## Starting dhcpcd...\n"
             dhcpcd > /dev/null 2>&1
-            systemctl enable dhcpcd@${iname}.service
+            sudo systemctl enable dhcpcd@${iname}.service
         fi
     fi
 }
 
-vbox () {
+install_sway () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
-        if [ ! -f "/etc/modules-load.d/virtualbox.conf" ]; then
-            echo -e "\n######## Setting up virtual box...\n"
-            pacman -S virtualbox-guest-modules-arch virtualbox-guest-utils
-            echo -e "vboxguest\nvboxsf\nvboxvideo" > /etc/modules-load.d/virtualbox.conf
-            systemctl enable vboxservice.service
-        fi
-    fi
-}
-
-install_xserver () {
-    if ! command -v arch-chroot > /dev/null 2>&1; then
-        if ! command -v startx > /dev/null 2>&1; then
-            echo -e "\n######## Installing xserver...\n"
-            pacman -Sy xorg-server xorg-xinit xorg-apps --noconfirm
+        if ! command -v sway > /dev/null 2>&1; then
+            echo -e "\n######## Installing sway...\n"
+            yay -Sy sway-git --noconfirm
         fi
     fi
 }
@@ -204,7 +202,7 @@ install_git () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if ! command -v git > /dev/null 2>&1; then
             echo -e "\n######## Installing git...\n"
-            pacman -Sy git --noconfirm
+            sudo pacman -Sy git --noconfirm
         fi
     fi
 }
@@ -213,7 +211,7 @@ install_go () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if ! command -v go > /dev/null 2>&1; then
             echo -e "\n######## Installing go...\n"
-            pacman -Sy go --noconfirm
+            sudo pacman -Sy go --noconfirm
         fi
     fi
 }
@@ -227,32 +225,20 @@ install_yay () {
             git clone https://aur.archlinux.org/yay.git
             cd yay
             makepkg -s
-            pacman -U yay*xz --noconfirm
+            sudo pacman -U yay*xz --noconfirm
         fi
     fi
 }
 
 install_ttf () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
-        if ! pacman -Q ttf-roboto > /dev/null 2>&1; then
+        if ! pacman -Q ttf-google-fonts-git > /dev/null 2>&1; then
             echo -e "\n######## Installing ttf font...\n"
-            yay -Sy ttf-roboto --noconfirm
+            yay -Sy ttf-google-fonts-git --noconfirm
         fi
     fi
 }
 
-install_i3 () {
-    if ! command -v arch-chroot > /dev/null 2>&1; then
-        if ! command -v i3 > /dev/null 2>&1; then
-            echo -e "\n######## Installing i3...\n"
-            yay -Sy i3-gaps --noconfirm
-        fi
-    fi
-}
-
-install_feh () {
-    echo "installing feh"
-}
 
 install_zsh () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
@@ -264,38 +250,42 @@ install_zsh () {
     fi
 }
 
+install_kitty () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if ! command -v kitty > /dev/null 2>&1; then
+            echo -e "\n######## Installing kitty...\n"
+            yay -S kitty-git --noconfirm
+            echo ""
+        fi
+    fi
+}
+
+install_spice () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if ! command -v spice-vdagent > /dev/null 2>&1; then
+            echo -e "\n######## Installing spice...\n"
+            yay -S spice-vdagent --noconfirm
+            echo ""
+        fi
+    fi
+}
+
+install_waybar () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if ! command -v waybar > /dev/null 2>&1; then
+            echo -e "\n######## Installing waybar...\n"
+            yay -S waybar-git --noconfirm
+            echo ""
+        fi
+    fi
+}
+
+
 install_oh_my_zsh () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
-        if [ ! -d ~/.oh-my-zsh > /dev/null 2>&1; then
+        if [ ! -d ~/.oh-my-zsh ]; then
             echo -e "\n######## Installing oh-my-zsh...\n"
             sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-        fi
-    fi
-}
-
-install_polybar () {
-    if ! command -v arch-chroot > /dev/null 2>&1; then
-        if ! command -v polybar > /dev/null 2>&1; then
-            echo -e "\n######## Installing polybar...\n"
-            yay -S polybar --noconfirm
-        fi
-    fi
-}
-
-add_xinitrc () {
-    if ! command -v arch-chroot > /dev/null 2>&1; then
-        if [ ! -f "~/.xinitrc" ]; then
-            echo -e "\n######## Adding i3 to xserver...\n"
-            echo "exec i3" > ~/.xinitrc
-        fi
-    fi
-}
-
-autostart_xserver () {
-    if ! command -v arch-chroot > /dev/null 2>&1; then
-        if [ ! -f "~/.zprofile" ]; then
-            echo -e "\n######## Adding xserver to autostart...\n"
-            echo -e 'if systemctl -q is-active graphical.target && [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]]; then\n  exec startx\nfi' > ~/.zprofile
         fi
     fi
 }
@@ -313,16 +303,16 @@ hosts
 passwd
 adduser
 grub
+# install_ly
 dhcp
-vbox
-install_xserver
+
 install_git
 install_go
 install_yay
-install_i3
+install_kitty
 install_zsh
 install_oh_my_zsh
 install_ttf
-install_polybar
-add_xinitrc
-autostart_xserver
+install_sway
+install_spice
+install_waybar
