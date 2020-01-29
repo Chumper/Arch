@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ##### CONSTANTS
-drive=/dev/vda
+drive=/dev/sda
 root_password=123
 user_name=nils
 user_password=123
@@ -12,12 +12,12 @@ partition () {
         if ! /sbin/sfdisk -d ${drive} > /dev/null 2>&1 ; then
             ### CONSTANTS
             boot_size=512M
-            
+
             echo -e "\n######## Calculating partitions...\n"
-            
+
             available_memory=$(free -b | grep Mem | awk '{print $2}')
             available_disk=$(fdisk -l | grep "${drive}" | awk '{print $5}')
-            
+
             swap_size="$(( ${available_memory} / 2 ))"
             home_size="$(( ${available_disk} - $(numfmt --from=iec ${boot_size}) - ${swap_size} ))"
 
@@ -29,7 +29,7 @@ partition () {
             echo -e "--------"
             echo -e "Boot Partition:\t\t${boot_size}"
             echo -e "Swap Partition:\t\t$(numfmt --format=%.1f --to=iec ${swap_size})"
-            echo -e "Home Partition:\t\t$(numfmt --format=%.1f --to=iec ${home_size})" 
+            echo -e "Home Partition:\t\t$(numfmt --format=%.1f --to=iec ${home_size})"
 
             parted ${drive} mklabel msdos > /dev/null 2>&1
             parted -a optimal ${drive} mkpart primary ext4 1MiB ${boot_size} > /dev/null 2>&1
@@ -38,13 +38,13 @@ partition () {
             parted -a optimal ${drive} mkpart primary ext4 ${boot_size} $(numfmt --to=iec --format=%.2f $(( $(numfmt --from=iec ${boot_size}) + ${home_size} )) ) > /dev/null 2>&1
 
             parted -a optimal ${drive} mkpart primary linux-swap $(numfmt --to=iec --format=%.2f $(( $(numfmt --from=iec ${boot_size}) + ${home_size} )) ) 100% > /dev/null 2>&1
-            
+
             echo -e "\n######## Creating filesystem on ${drive}1...\n"
             mkfs.ext4 ${drive}1
-            
+
             echo -e "\n######## Creating filesystems on ${drive}2......\n"
             mkfs.ext4 ${drive}2
-            
+
             echo -e "\n######## Creating filesystems on ${drive}3......\n"
             mkswap ${drive}3
         fi
@@ -79,7 +79,7 @@ base () {
 }
 
 fstab () {
-    if command -v arch-chroot > /dev/null 2>&1; then   
+    if command -v arch-chroot > /dev/null 2>&1; then
         if [ $(cat /mnt/etc/fstab | wc -l) -lt 5 ]; then
             echo -e "\n######## Generating fstab...\n"
             genfstab -U /mnt >> /mnt/etc/fstab
@@ -274,7 +274,7 @@ install_waybar () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if ! command -v waybar > /dev/null 2>&1; then
             echo -e "\n######## Installing waybar...\n"
-            yay -S waybar-git --noconfirm
+            yay -S waybar --noconfirm
             echo ""
         fi
     fi
@@ -314,5 +314,5 @@ install_zsh
 install_oh_my_zsh
 install_ttf
 install_sway
-install_spice
+# install_spice
 install_waybar
