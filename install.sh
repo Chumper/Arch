@@ -107,6 +107,16 @@ timezone () {
     fi
 }
 
+mirrors () {
+    if command -v arch-chroot > /dev/null 2>&1; then
+        if ! arch-chroot /mnt bash -c 'command -v reflector'; then
+            echo -e "\n######## Adding mirrors...\n"
+            arch-chroot /mnt bash -c 'pacman -S reflector --noconfirm'
+            arch-chroot /mnt bash -c "reflector --verbose --latest 25 --sort rate --save /etc/pacman.d/mirrorlist"
+        fi
+    fi
+}
+
 hostname () {
     if command -v arch-chroot > /dev/null 2>&1; then
         if ! arch-chroot /mnt bash -c 'test -f /etc/hostname'; then
