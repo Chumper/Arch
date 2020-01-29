@@ -308,6 +308,7 @@ base
 fstab
 locale
 timezone
+mirrors
 hostname
 hosts
 passwd
