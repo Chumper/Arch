@@ -254,7 +254,7 @@ install_zsh () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if ! command -v zsh > /dev/null 2>&1; then
             echo -e "\n######## Installing zsh...\n"
-            yay -S zsh --noconfirm
+            yay -Sy zsh --noconfirm
             chsh -s /bin/zsh ${user_name}
         fi
     fi
@@ -264,7 +264,7 @@ install_kitty () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if ! command -v kitty > /dev/null 2>&1; then
             echo -e "\n######## Installing kitty...\n"
-            yay -S kitty-git --noconfirm
+            yay -Sy kitty-git --noconfirm
             echo ""
         fi
     fi
@@ -274,7 +274,7 @@ install_spice () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if ! command -v spice-vdagent > /dev/null 2>&1; then
             echo -e "\n######## Installing spice...\n"
-            yay -S spice-vdagent --noconfirm
+            yay -Sy spice-vdagent --noconfirm
             echo ""
         fi
     fi
@@ -284,7 +284,7 @@ install_waybar () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if ! command -v waybar > /dev/null 2>&1; then
             echo -e "\n######## Installing waybar...\n"
-            yay -S waybar --noconfirm
+            yay -Sy waybar --noconfirm
             echo ""
         fi
     fi
@@ -305,6 +305,19 @@ show_cursor () {
         if ! grep "WLR_NO_HARDWARE_CURSORS" "~/.zshenv"; then
             echo -e "\n######## Adding WLR_NO_HARDWARE_CURSORS ...\n"
             echo "export WLR_NO_HARDWARE_CURSORS=1" >> ~/.zshenv
+        fi
+    fi
+}
+
+install_vmtools () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if ! pacman -Q xf86-video-vmware; then
+            echo -e "\n######## Installing vmtools...\n"
+            yay -Sy open-vm-tools xf86-video-vmware --noconfirm
+            systemctl enable vmtoolsd.service
+            systemctl start vmtoolsd.service
+            systemctl enable vmware-vmblock-fuse.service
+            systemctl start vmware-vmblock-fuse.service
         fi
     fi
 }
@@ -337,3 +350,4 @@ install_sway
 # install_spice
 install_waybar
 show_cursor
+install_vmtools
