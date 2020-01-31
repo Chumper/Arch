@@ -302,7 +302,7 @@ install_oh_my_zsh () {
 
 show_cursor () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
-        if [ ! grep "WLR_NO_HARDWARE_CURSORS" ~/.zshenv ]; then
+        if ! grep "WLR_NO_HARDWARE_CURSORS" ~/.zshenv ; then
             echo -e "\n######## Adding WLR_NO_HARDWARE_CURSORS ...\n"
             echo "export WLR_NO_HARDWARE_CURSORS=1" >> ~/.zshenv
         fi
