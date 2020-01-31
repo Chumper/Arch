@@ -326,7 +326,7 @@ autostart_sway () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if ! grep -q "XKB_DEFAULT_LAYOUT" ~/.zshenv; then
             echo -e "\n######## Autostart sway...\n"
-            echo -e "if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then\n  XKB_DEFAULT_LAYOUT=us exec sway\nfi" >> ~/.zshenv
+            echo -e 'if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then\n  XKB_DEFAULT_LAYOUT=us exec sway\nfi' >> ~/.zshenv
         fi
     fi
 }
