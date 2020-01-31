@@ -302,7 +302,7 @@ install_oh_my_zsh () {
 
 show_cursor () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
-        if ! grep "WLR_NO_HARDWARE_CURSORS" "~/.zshenv"; then
+        if ! grep "WLR_NO_HARDWARE_CURSORS" ~/.zshenv; then
             echo -e "\n######## Adding WLR_NO_HARDWARE_CURSORS ...\n"
             echo "export WLR_NO_HARDWARE_CURSORS=1" >> ~/.zshenv
         fi
@@ -324,7 +324,7 @@ install_vmtools () {
 
 autostart_sway () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
-        if ! grep "XKB_DEFAULT_LAYOUT" "~/.zshenv"; then
+        if ! grep "XKB_DEFAULT_LAYOUT" ~/.zshenv; then
             echo -e "\n######## Autostart sway...\n"
             echo -e "if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then\n  XKB_DEFAULT_LAYOUT=us exec sway\nfi" >> ~/.zshenv
         fi
