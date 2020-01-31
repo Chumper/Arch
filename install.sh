@@ -300,6 +300,15 @@ install_oh_my_zsh () {
     fi
 }
 
+show_cursor () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if [ ! grep "WLR_NO_HARDWARE_CURSORS" ~/.zshenv ]; then
+            echo -e "\n######## Adding WLR_NO_HARDWARE_CURSORS ...\n"
+            echo "export WLR_NO_HARDWARE_CURSORS=1" >> ~/.zshenv
+        fi
+    fi
+}
+
 ### MAIN
 
 partition
@@ -327,3 +336,4 @@ install_ttf
 install_sway
 # install_spice
 install_waybar
+show_cursor
