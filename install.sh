@@ -311,7 +311,7 @@ show_cursor () {
 
 install_vmtools () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
-        if ! pacman -Q xf86-video-vmware; then
+        if ! pacman -Q -q xf86-video-vmware; then
             echo -e "\n######## Installing vmtools...\n"
             yay -Sy open-vm-tools xf86-video-vmware --noconfirm
             systemctl enable vmtoolsd.service
