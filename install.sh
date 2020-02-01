@@ -244,6 +244,7 @@ install_ttf () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if ! pacman -Q ttf-google-fonts-git > /dev/null 2>&1; then
             echo -e "\n######## Installing ttf font...\n"
+            yay -Sy otf-font-awesome --noconfirm
             yay -Sy ttf-google-fonts-git --noconfirm
         fi
     fi
