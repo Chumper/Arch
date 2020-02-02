@@ -205,9 +205,14 @@ bar {
     swaybar_command waybar
 }
 
-#no borders
+# no borders
 border_default none
 
+# gaps 
+gaps inner 4
+gaps outer 8
+
+smart_gaps on
 output "Virtual-1" scale 2
 
 include @sysconfdir@/sway/config.d/*
