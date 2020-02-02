@@ -298,6 +298,15 @@ install_brave () {
     fi
 }
 
+install_wofi () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if ! command -v wofi > /dev/null 2>&1; then
+            echo -e "\n######## Installing wofi...\n"
+            yay -Sy wofi --noconfirm
+        fi
+    fi
+}
+
 install_oh_my_zsh () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if [ ! -d ~/.oh-my-zsh ]; then
@@ -369,3 +378,4 @@ show_cursor
 install_vmtools
 autostart_sway
 install_brave
+install_wofi
