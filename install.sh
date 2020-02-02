@@ -148,6 +148,7 @@ adduser () {
             echo -e "\n######## Adding user '${user_name}'...\n"
             arch-chroot /mnt bash -c "useradd --home-dir /home/${user_name} --create-home ${user_name}"
             arch-chroot /mnt bash -c "echo '${user_name}:${user_password}' | chpasswd"
+            arch-chroot /mnt bash -c "usermod -a -G video ${user_name}" 
         fi
         if ! arch-chroot /mnt bash -c 'command -v sudo > /dev/null 2>&1'; then
             echo -e "\n######## Installing sudoers...\n"
