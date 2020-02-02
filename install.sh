@@ -267,7 +267,6 @@ install_kitty () {
         if ! command -v kitty > /dev/null 2>&1; then
             echo -e "\n######## Installing kitty...\n"
             yay -Sy kitty-git --noconfirm
-            echo ""
         fi
     fi
 }
@@ -277,7 +276,6 @@ install_spice () {
         if ! command -v spice-vdagent > /dev/null 2>&1; then
             echo -e "\n######## Installing spice...\n"
             yay -Sy spice-vdagent --noconfirm
-            echo ""
         fi
     fi
 }
@@ -287,11 +285,18 @@ install_waybar () {
         if ! command -v waybar > /dev/null 2>&1; then
             echo -e "\n######## Installing waybar...\n"
             yay -Sy waybar --noconfirm
-            echo ""
         fi
     fi
 }
 
+install_brave () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if ! command -v brave > /dev/null 2>&1; then
+            echo -e "\n######## Installing brave...\n"
+            yay -Sy brave-bin --noconfirm
+        fi
+    fi
+}
 
 install_oh_my_zsh () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
@@ -363,3 +368,4 @@ install_waybar
 show_cursor
 install_vmtools
 autostart_sway
+install_brave
