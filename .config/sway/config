@@ -218,7 +218,7 @@ smart_gaps on
 output "Virtual-1" scale 2
 
 # Cursor
-seat seat0 Adwaita Adwaita 48
+seat seat0 xcursor_theme Adwaita 48
 
 
 include @sysconfdir@/sway/config.d/*
