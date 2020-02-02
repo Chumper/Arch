@@ -211,8 +211,14 @@ default_border none
 # gaps 
 gaps inner 4
 gaps outer 8
-
 smart_gaps on
+
+# Outputs
+# Laptop
 output "Virtual-1" scale 2
+
+# Cursor
+seat seat0 Adwaita Adwaita 48
+
 
 include @sysconfdir@/sway/config.d/*
