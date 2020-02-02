@@ -141,8 +141,8 @@ set $menu dmenu_path | wofi --show drun -i | xargs swaymsg exec --
     # You can "split" the current object of your focus with
     # $mod+b or $mod+v, for horizontal and vertical splits
     # respectively.
-    bindsym $mod+[ splith
-    bindsym $mod+] splitv
+    bindcode $mod+26 splith
+    bindcode $mod+27 splitv
 
     # Switch the current container between different layout styles
     bindsym $mod+s layout stacking
