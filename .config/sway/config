@@ -206,7 +206,7 @@ bar {
 }
 
 # no borders
-border_default none
+default_border none
 
 # gaps 
 gaps inner 4
