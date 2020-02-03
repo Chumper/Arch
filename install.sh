@@ -307,6 +307,15 @@ install_wofi () {
     fi
 }
 
+install_pulseaudio () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if ! command -v pulseaudio > /dev/null 2>&1; then
+            echo -e "\n######## Installing pulseaudio...\n"
+            yay -Sy pulseaudio --noconfirm
+        fi
+    fi
+}
+
 install_oh_my_zsh () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if [ ! -d ~/.oh-my-zsh ]; then
@@ -379,3 +388,4 @@ install_vmtools
 autostart_sway
 install_brave
 install_wofi
+install_pulseaudio
