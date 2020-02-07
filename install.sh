@@ -246,7 +246,7 @@ install_ttf () {
         if ! pacman -Q ttf-google-fonts-git > /dev/null 2>&1; then
             echo -e "\n######## Installing ttf font...\n"
             yay -Sy otf-font-awesome --noconfirm
-            yay -Sy ttf-google-fonts-git --noconfirm
+            yay -Sy noto-fonts --noconfirm
         fi
     fi
 }
