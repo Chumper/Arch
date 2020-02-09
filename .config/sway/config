@@ -20,6 +20,9 @@ set $term kitty
 # on the original workspace that the command was run on.
 set $menu dmenu_path | wofi --show drun -i | xargs swaymsg exec --
 
+### Colors
+include "$HOME/.cache/wal/colors-sway"
+
 ### Output configuration
 #
 # Default wallpaper (more resolutions are available in @datadir@/backgrounds/sway/)
