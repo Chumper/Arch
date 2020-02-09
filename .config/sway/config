@@ -209,11 +209,11 @@ bar {
 }
 
 # no borders
-default_border none
+default_border pixel 4
 
 # gaps 
-gaps inner 4
-gaps outer 8
+gaps inner 8
+gaps outer 4
 smart_gaps on
 
 # Outputs
