@@ -243,7 +243,7 @@ install_yay () {
 
 install_ttf () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
-        if ! pacman -Q ttf-google-fonts-git > /dev/null 2>&1; then
+        if ! pacman -Q noto-fonts > /dev/null 2>&1; then
             echo -e "\n######## Installing ttf font...\n"
             yay -Sy otf-font-awesome --noconfirm
             yay -Sy noto-fonts --noconfirm
@@ -356,6 +356,14 @@ autostart_sway () {
     fi
 }
 
+download_configs () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        echo -e "\n######## Download sway config...\n"
+        mkdir -p ~/.config/sway
+        curl -fsSL https://raw.githubusercontent.com/Chumper/Arch/master/.config/sway/config -o ~/.config/sway/config
+    fi
+}
+
 ### MAIN
 
 partition
@@ -388,4 +396,5 @@ install_vmtools
 autostart_sway
 install_brave
 install_wofi
-install_pulseaudio
+# install_pulseaudio
+download_configs
