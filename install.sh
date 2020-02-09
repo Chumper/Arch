@@ -367,9 +367,10 @@ download_configs () {
 early_kms () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if ! grep -q "MODULES=()" /etc/mkinitcpio.conf; then
-        echo -e "\n######## Initiate early KMS...\n"
-        sed -i .bak 's/MODULES=()/MODULES(amdgpu)/' /etc/mkinitcpio.conf
-        mkinitcpio -P
+            echo -e "\n######## Initiate early KMS...\n"
+            sed -i .bak 's/MODULES=()/MODULES(amdgpu)/' /etc/mkinitcpio.conf
+            mkinitcpio -P
+        fi
     fi
 }
 
