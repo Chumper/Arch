@@ -361,6 +361,9 @@ download_configs () {
         echo -e "\n######## Download sway config...\n"
         mkdir -p ~/.config/sway
         curl -fsSL https://raw.githubusercontent.com/Chumper/Arch/master/.config/sway/config -o ~/.config/sway/config
+        echo -e "\n######## Download waybar config...\n"
+        mkdir -p ~/.config/waybar
+        curl -fsSL https://raw.githubusercontent.com/Chumper/Arch/master/.config/sway/waybar -o ~/.config/waybar/config
     fi
 }
 
