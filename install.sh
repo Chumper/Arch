@@ -307,6 +307,15 @@ install_wofi () {
     fi
 }
 
+install_mako () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if ! command -v mako > /dev/null 2>&1; then
+            echo -e "\n######## Installing mako...\n"
+            yay -Sy mako --noconfirm
+        fi
+    fi
+}
+
 install_pulseaudio () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if ! command -v pulseaudio > /dev/null 2>&1; then
@@ -415,6 +424,7 @@ install_zsh
 install_oh_my_zsh
 install_ttf
 install_sway
+install_mako
 # install_spice
 install_waybar
 show_cursor
