@@ -376,6 +376,13 @@ download_configs () {
         echo -e "\n######## Download kitty config...\n"
         mkdir -p ~/.config/kitty
         curl -fsSL https://raw.githubusercontent.com/Chumper/Arch/master/.config/kitty/kitty.conf -o ~/.config/kitty/kitty.conf
+        curl -fsSL https://raw.githubusercontent.com/Chumper/Arch/master/.config/kitty/nord.conf -o ~/.config/kitty/nord.conf
+        echo -e "\n######## Download mako config...\n"
+        mkdir -p ~/.config/mako
+        curl -fsSL https://raw.githubusercontent.com/Chumper/Arch/master/.config/mako/config -o ~/.config/mako/config
+        echo -e "\n######## Download wofi config...\n"
+        mkdir -p ~/.config/wofi
+        curl -fsSL https://raw.githubusercontent.com/Chumper/Arch/master/.config/wofi/style.css -o ~/.config/wofi/style.css
     fi
 }
 
