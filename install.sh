@@ -318,7 +318,7 @@ install_mako () {
 
 install_alsa () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
-        if ! ! pacman -Q -q alsa-utils > /dev/null 2>&1; then
+        if ! pacman -Q -q alsa-utils > /dev/null 2>&1; then
             echo -e "\n######## Installing alsa...\n"
             yay -Sy alsa-utils --noconfirm
         fi
@@ -409,7 +409,7 @@ early_kms () {
 fix_autocompletion () {
     # https://github.com/ohmyzsh/ohmyzsh/issues/4632
     if ! command -v arch-chroot > /dev/null 2>&1; then
-        if grep -q 'export LC_ALL="en_US.UTF-8"' ~/.zshrc; then
+        if ! grep -q 'export LC_ALL="en_US.UTF-8"' ~/.zshrc; then
             echo -e "\n######## Setup autocompletion fix...\n"
             echo 'export LC_ALL="en_US.UTF-8"' >> ~/.zshrc 
         fi
