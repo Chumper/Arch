@@ -325,6 +325,15 @@ install_alsa () {
     fi
 }
 
+install_spotify () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if ! command -v spotifys > /dev/null 2>&1; then
+            echo -e "\n######## Installing spotify...\n"
+            yay -Sy spotify --noconfirm
+        fi
+    fi
+}
+
 install_oh_my_zsh () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if [ ! -d ~/.oh-my-zsh ]; then
@@ -441,5 +450,6 @@ autostart_sway
 install_brave
 install_wofi
 install_alsa
+install_spotify
 download_configs
 fix_autocompletion
