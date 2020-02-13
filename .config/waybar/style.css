@@ -7,7 +7,7 @@
 }
 
 window#waybar {
-    background-color: #2e3440;
+    background-color: rgba(46,52,64,0.5);
     color: #eceff4;
     transition-property: background-color;
     transition-duration: .5s;
@@ -108,16 +108,11 @@ label:focus {
     background-color: #ffa000;
 }
 
-#temperature.critical {
-    color: #BF616A;
-}
-
 #idle_inhibitor {
-    background-color: #2d3436;
+    background-color: transparent;
 }
 
 #idle_inhibitor.activated {
-    background-color: #ecf0f1;
     color: #2d3436;
 }
 
