@@ -318,7 +318,7 @@ install_mako () {
 
 install_alsa () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
-        if ! command -v alsa-utils > /dev/null 2>&1; then
+        if ! ! pacman -Q -q alsa-utils > /dev/null 2>&1; then
             echo -e "\n######## Installing alsa...\n"
             yay -Sy alsa-utils --noconfirm
         fi
@@ -327,7 +327,7 @@ install_alsa () {
 
 install_spotify () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
-        if ! command -v spotifys > /dev/null 2>&1; then
+        if ! command -v spotify > /dev/null 2>&1; then
             echo -e "\n######## Installing spotify...\n"
             yay -Sy spotify --noconfirm
         fi
