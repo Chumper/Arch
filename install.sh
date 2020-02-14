@@ -247,6 +247,7 @@ install_ttf () {
             echo -e "\n######## Installing ttf font...\n"
             yay -Sy otf-font-awesome --noconfirm
             yay -Sy noto-fonts --noconfirm
+            yay -Sy ttf-material-design-icons --noconfirm
         fi
     fi
 }
