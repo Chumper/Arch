@@ -335,6 +335,15 @@ install_spotify () {
     fi
 }
 
+install_vscode () {
+    if ! command -v arch-chroot > /dev/null 2>&1; then
+        if ! command -v code > /dev/null 2>&1; then
+            echo -e "\n######## Installing vscode...\n"
+            yay -Sy visual-studio-code-bin --noconfirm
+        fi
+    fi
+}
+
 install_oh_my_zsh () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
         if [ ! -d ~/.oh-my-zsh ]; then
@@ -452,5 +461,6 @@ install_brave
 install_wofi
 install_alsa
 install_spotify
+install_vscode
 download_configs
 fix_autocompletion
