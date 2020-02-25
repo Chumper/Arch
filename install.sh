@@ -290,11 +290,11 @@ install_waybar () {
     fi
 }
 
-install_brave () {
+install_chrome () {
     if ! command -v arch-chroot > /dev/null 2>&1; then
-        if ! command -v brave > /dev/null 2>&1; then
-            echo -e "\n######## Installing brave...\n"
-            yay -Sy brave-bin --noconfirm
+        if ! command -v google-chrome-beta > /dev/null 2>&1; then
+            echo -e "\n######## Installing chrome...\n"
+            yay -Sy google-chrome-beta --noconfirm
         fi
     fi
 }
